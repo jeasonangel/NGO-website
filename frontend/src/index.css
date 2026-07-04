@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-surface-page text-ink-primary font-sans antialiased;
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply max-w-6xl mx-auto px-6;
+  }
+  .section {
+    @apply py-14 md:py-20;
+  }
+  .card {
+    @apply bg-surface-card rounded-xl shadow-sm border border-ink-primary/10 p-6;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 bg-ngo-primary text-white px-5 py-2.5 rounded-lg hover:bg-ngo-primary-dark transition-colors font-medium;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 border border-ink-primary/15 text-ink-primary px-5 py-2.5 rounded-lg hover:bg-black/5 transition-colors font-medium;
+  }
+  .btn-accent {
+    @apply inline-flex items-center justify-center gap-2 bg-ngo-accent text-white px-5 py-2.5 rounded-lg hover:bg-ngo-accent-dark transition-colors font-medium;
+  }
+  .input {
+    @apply border border-ink-primary/15 rounded-lg px-4 py-2 w-full bg-white focus:outline-none focus:ring-2 focus:ring-ngo-primary focus:border-transparent;
+  }
+  .label {
+    @apply text-ink-secondary text-sm font-medium block mb-1;
+  }
+  .badge {
+    @apply inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full;
+  }
+  .nav-link {
+    @apply text-sm font-medium text-ink-secondary hover:text-ngo-primary transition-colors;
+  }
+  .nav-link-active {
+    @apply text-ngo-primary;
+  }
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-wider text-ngo-primary;
+  }
+}

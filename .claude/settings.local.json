@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"c:\\\\Users\\\\DELL\\\\Desktop\\\\BtechDesign_project\\\\cameroon-census-project\\\\census-portal\\\\backend\" && find src -type f | head -100)",
+      "Read(//c/Users/DELL/Desktop/BtechDesign_project/cameroon-census-project/census-portal/backend/**)",
+      "Skill(dataviz)",
+      "Skill(dataviz:*)",
+      "Bash(npm install *)",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5174/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5173/)",
+      "Skill(run)",
+      "Skill(run:*)",
+      "Bash(npx --yes playwright --version)",
+      "Bash(node -e ' *)",
+      "Bash(npx --yes playwright install chromium --with-deps)",
+      "Bash(cat \"/c/Users/DELL/AppData/Local/Temp/claude/c--Users-DELL-Desktop-BtechDesign-project-NGO-website/8166fb4c-98da-48e1-b925-38cf2696c53f/tasks/bi1p711b5.output\")",
+      "Read(//c/Users/DELL/AppData/Local/Temp/claude/c--Users-DELL-Desktop-BtechDesign-project-NGO-website/8166fb4c-98da-48e1-b925-38cf2696c53f/tasks/**)",
+      "Bash(npm init *)",
+      "Bash(node screenshot.js)",
+      "Bash(curl -s -X POST http://localhost:3001/api/v1/auth/register -H \"Content-Type: application/json\" -d '{\"email\":\"verify-test@example.com\",\"password\":\"TestPass123!\",\"full_name\":\"Verify Test\"}')",
+      "Bash(node screenshot-data.js \"cam_84a70140c391dbbe8b77e2e5ca2dabec32149a1020b9254d88e1fc93ae23da9f\")",
+      "Bash(curl -s -i \"http://localhost:3001/api/v1/protected/data?geography=CE&indicator=POP_TOT&year=2026\" -H \"X-API-Key: cam_84a70140c391dbbe8b77e2e5ca2dabec32149a1020b9254d88e1fc93ae23da9f\")",
+      "Bash(curl -s -o /dev/null -w \"app1 \\(3001\\): %{http_code}\\\\n\" http://localhost:3001/health)",
+      "Bash(netstat -ano)",
+      "Bash(curl -s -i \"http://localhost:3001/api/v1/protected/data?geography=CE&indicator=POP_TOT&year=2026\" -H \"X-API-Key: cam_7e1ce47ffc5e44508f27728caab36a1217aefa04d9f711458179cad5f5e05111\")",
+      "Bash(cat \"/c/Users/DELL/AppData/Local/Temp/claude/c--Users-DELL-Desktop-BtechDesign-project-NGO-website/8166fb4c-98da-48e1-b925-38cf2696c53f/scratchpad/backend-dev.log\")",
+      "Read(//c/Users/DELL/AppData/Local/Temp/claude/c--Users-DELL-Desktop-BtechDesign-project-NGO-website/8166fb4c-98da-48e1-b925-38cf2696c53f/scratchpad/**)",
+      "Bash(tail -n 15 \"/c/Users/DELL/AppData/Local/Temp/claude/c--Users-DELL-Desktop-BtechDesign-project-NGO-website/8166fb4c-98da-48e1-b925-38cf2696c53f/scratchpad/backend-dev3.log\")"
+    ]
+  }
+}
