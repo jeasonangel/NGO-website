@@ -12,7 +12,7 @@ function required(name: string): string {
 export const config = {
   port: parseInt(process.env.PORT || '4000', 10),
 
-  censusApiUrl: process.env.CENSUS_API_URL || 'http://localhost:3001/api/v1',
+  censusApiUrl: process.env.CENSUS_API_URL || 'https://census-portal-production.up.railway.app/api/v1',
   censusApiKey: required('CENSUS_API_KEY'),
   censusYear: parseInt(process.env.CENSUS_YEAR || '2026', 10),
 
