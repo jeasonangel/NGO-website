@@ -64,7 +64,7 @@ router.get('/regions', async (_req, res, next) => {
 router.get('/geo/regions/:code/departments', async (req, res, next) => {
   try {
     const { data } = await censusClient.get<{ data: UpstreamGeography[] }>(
-      `/public/regions/${req.params.code}/departments`
+      `/protected/regions/${req.params.code}/departments`
     );
     res.json({ data: data.data });
   } catch (e) {
@@ -75,7 +75,7 @@ router.get('/geo/regions/:code/departments', async (req, res, next) => {
 router.get('/geo/departments/:code/districts', async (req, res, next) => {
   try {
     const { data } = await censusClient.get<{ data: UpstreamGeography[] }>(
-      `/public/departments/${req.params.code}/districts`
+      `/protected/departments/${req.params.code}/districts`
     );
     res.json({ data: data.data });
   } catch (e) {
@@ -89,7 +89,7 @@ router.get('/geo/districts/:code/villages', async (req, res, next) => {
     // code), so villages are informational here — not chartable by
     // indicator the way regions/departments/districts are.
     const { data } = await censusClient.get<{ data: { name: string }[] }>(
-      `/public/districts/${req.params.code}/villages`
+      `/protected/districts/${req.params.code}/villages`
     );
     res.json({ data: data.data });
   } catch (e) {
