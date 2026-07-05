@@ -1,46 +1,56 @@
+// backend/src/app.ts
 import express, { Request, Response, NextFunction } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import compression from 'compression';
 import morgan from 'morgan';
+import dotenv from 'dotenv';
 
 import dataRoutes from './routes/data';
 import { config } from './config';
 
+dotenv.config();
+
 export function buildApp() {
   const app = express();
 
+  // Middleware
   app.use(helmet());
-  app.use(cors({ origin: config.corsOrigins }));
+  app.use(cors({ 
+    origin: config.corsOrigins,
+    credentials: true,
+  }));
   app.use(compression());
   app.use(express.json());
   app.use(morgan('tiny'));
 
-  app.get('/health', (_req, res) => res.json({ status: 'ok', app: 'ngo-website-backend' }));
-
-  // Everything the public site needs lives under /api — the frontend never
-  // talks to the Census Data Portal (Application 1) directly, and the API
-  // key configured in .env never leaves this process.
-  app.use('/api', dataRoutes);
-
-  app.use((_req, res) => {
-    res.status(404).json({ error: 'Not found' });
+  // Health check
+  app.get('/health', (_req, res) => {
+    res.json({ 
+      status: 'ok', 
+      app: 'ngo-website-backend',
+      timestamp: new Date().toISOString(),
+    });
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // ✅ All API routes under /api
+  app.use('/api', dataRoutes);
+
+  // 404 handler
+  app.use((_req, res) => {
+    console.log('❌ Route not found:', _req.method, _req.path);
+    res.status(404).json({ error: 'Not found', path: _req.path });
+  });
+
+  // Error handler
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const upstreamStatus = err.response?.status;
 
     if (upstreamStatus === 401) {
-      // The Census Data Portal rejected our key outright — this is a
-      // misconfiguration of THIS backend (a bad/stale CENSUS_API_KEY in
-      // .env), not a visitor-facing hiccup. Make it impossible to miss
-      // in the server log even though the browser only ever sees a
-      // generic "unavailable" response.
       console.error(
         '\n🔑 CENSUS_API_KEY WAS REJECTED BY THE CENSUS DATA PORTAL (401 Invalid API key).\n' +
-          '   No census data can be served until backend/.env has a valid key\n' +
-          '   and the backend has been restarted.\n'
+        '   No census data can be served until backend/.env has a valid key\n' +
+        '   and the backend has been restarted.\n'
       );
     } else {
       console.error('Census proxy error:', upstreamStatus, err.response?.data || err.message);
