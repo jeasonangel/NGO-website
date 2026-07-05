@@ -126,7 +126,7 @@ export default function DataExplorer() {
       })
       .catch(() => {
         if (!cancelled) {
-          setError('Failed to load census data. Please try again. Verify the key');
+          setError('Failed to load census data. Please try again.');
           setRawValues([]);
         }
       })
