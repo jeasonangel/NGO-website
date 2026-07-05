@@ -25,6 +25,7 @@
     "@types/express": "^5.0.6",
     "@types/morgan": "^1.9.10",
     "@types/node": "^22.10.0",
+    "serve": "^14.2.6",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.7.2"
   }
