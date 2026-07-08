@@ -232,8 +232,8 @@ ts-node-dev (hot reload in development).
 PostgreSQL, JWT-based developer accounts, bcrypt-hashed API keys, per-key
 monthly quota enforcement.
 
-
 ---
+
 
 ## 9. Running the project locally
 
