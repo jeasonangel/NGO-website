@@ -3,13 +3,19 @@ import { MapPin, TrendingUp, TrendingDown, Gauge, Home as HomeIcon } from 'lucid
 import StatCard from '../components/StatCard';
 import GeoBarChart, { GeoBarDatum } from '../components/charts/GeoBarChart';
 import PopulationBreakdown from '../components/charts/PopulationBreakdown';
-import { api, CENSUS_YEAR, GeoLevel, PopulationBreakdownData } from '../lib/api';
+import { api, CENSUS_YEAR, GeoLevel, PopulationBreakdownData, Village } from '../lib/api';
 import { Geography, Indicator } from '../types';
+
+// Shape shared by everything that can appear in the level list/chart/table —
+// regions, departments and districts (Geography) as well as villages
+// (Village), which only carry code/name/population.
+type Entity = { code: string; name: string; population?: number };
 
 const LEVELS: { value: GeoLevel; label: string; averageLabel: string }[] = [
   { value: 'region', label: 'Regions', averageLabel: 'National average' },
   { value: 'department', label: 'Departments', averageLabel: 'Regional average' },
   { value: 'district', label: 'Districts', averageLabel: 'Departmental average' },
+  { value: 'village', label: 'Villages', averageLabel: 'District average' },
 ];
 
 export default function DataExplorer() {
@@ -23,7 +29,8 @@ export default function DataExplorer() {
   const [departmentCode, setDepartmentCode] = useState<string>('');
   const [districts, setDistricts] = useState<Geography[]>([]);
   const [districtCode, setDistrictCode] = useState<string>('');
-  const [villages, setVillages] = useState<{ name: string }[]>([]);
+  const [villages, setVillages] = useState<Village[]>([]);
+  const [villageCode, setVillageCode] = useState<string>('');
 
   const [selectedIndicator, setSelectedIndicator] = useState('POP_TOT');
 
@@ -66,9 +73,10 @@ export default function DataExplorer() {
     };
   }, [level, regionCode]);
 
-  // Districts for the selected department — needed at district level.
+  // Districts for the selected department — needed at district level and
+  // village level (villages drill down from a district).
   useEffect(() => {
-    if (level !== 'district' || !departmentCode) return;
+    if ((level !== 'district' && level !== 'village') || !departmentCode) return;
     let cancelled = false;
     api
       .getDistricts(departmentCode)
@@ -84,18 +92,23 @@ export default function DataExplorer() {
     };
   }, [level, departmentCode]);
 
-  // Villages in the focused district — informational only (Application 1's
-  // public villages endpoint doesn't return a geography code, so these
-  // can't be charted by indicator).
+  // Villages in the focused district. Shown as an informational list at
+  // district level, and drillable (chartable by indicator) at village level
+  // now that the upstream API returns a `code` for each village.
   useEffect(() => {
-    if (level !== 'district' || !districtCode) {
+    if ((level !== 'district' && level !== 'village') || !districtCode) {
       setVillages([]);
       return;
     }
     let cancelled = false;
     api
       .getVillages(districtCode)
-      .then((res) => !cancelled && setVillages(res.data.data || []))
+      .then((res) => {
+        if (cancelled) return;
+        const list = res.data.data || [];
+        setVillages(list);
+        setVillageCode((prev) => (list.some((v) => v.code === prev) ? prev : list[0]?.code || ''));
+      })
       .catch(() => !cancelled && setVillages([]));
     return () => {
       cancelled = true;
@@ -105,17 +118,33 @@ export default function DataExplorer() {
   // The list of entities being compared at the current level, and which
   // one is "focused" (highlighted, shown in the stat cards & population
   // snapshot).
-  const items: Geography[] = useMemo(() => {
+  const items: Entity[] = useMemo(() => {
     if (level === 'region') return regions;
     if (level === 'department') return departments;
-    return districts;
-  }, [level, regions, departments, districts]);
+    if (level === 'district') return districts;
+    return villages;
+  }, [level, regions, departments, districts, villages]);
 
-  const focusedCode = level === 'region' ? regionCode : level === 'department' ? departmentCode : districtCode;
+  const focusedCode =
+    level === 'region'
+      ? regionCode
+      : level === 'department'
+      ? departmentCode
+      : level === 'district'
+      ? districtCode
+      : villageCode;
 
-  // Indicator value for every entity at the current level.
+  // Indicator value for every entity at the current level. An empty `items`
+  // list is a valid state now (e.g. a district with no villages yet, or a
+  // freshly-created department with no districts) — it should resolve to
+  // "no data", not leave the view stuck on a loading spinner.
   useEffect(() => {
-    if (items.length === 0) return;
+    if (items.length === 0) {
+      setLoading(false);
+      setError(null);
+      setRawValues([]);
+      return;
+    }
     let cancelled = false;
     setLoading(true);
     setError(null);
@@ -134,14 +163,20 @@ export default function DataExplorer() {
     return () => {
       cancelled = true;
     };
-    // items is recomputed from level/regions/departments/districts, so its
-    // membership (not identity) is what should trigger a refetch.
+    // items is recomputed from level/regions/departments/districts/villages,
+    // so its membership (not identity) is what should trigger a refetch.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedIndicator, items.map((i) => i.code).join(',')]);
 
-  // Population split for the focused entity (works at any level).
+  // Population split for the focused entity (works at any level). No
+  // focused entity (e.g. a district with no villages yet) is "no data",
+  // not a stuck spinner.
   useEffect(() => {
-    if (!focusedCode) return;
+    if (!focusedCode) {
+      setPopulation(null);
+      setPopulationLoading(false);
+      return;
+    }
     let cancelled = false;
     setPopulationLoading(true);
     api
@@ -179,8 +214,8 @@ export default function DataExplorer() {
         <h1 className="text-3xl font-bold text-ink-primary">Explore Cameroon Census Data</h1>
         <p className="text-ink-secondary mt-2 max-w-2xl">
           Live demographic, education, housing and economic indicators, drillable
-          from region down to district — the same data our team uses to plan
-          where our programs go next.
+          from region all the way down to village — the same data our team uses
+          to plan where our programs go next.
         </p>
       </div>
 
@@ -218,7 +253,7 @@ export default function DataExplorer() {
           </select>
         </div>
 
-        {(level === 'department' || level === 'district') && (
+        {(level === 'department' || level === 'district' || level === 'village') && (
           <div>
             <label className="label">Department</label>
             <select className="input" value={departmentCode} onChange={(e) => setDepartmentCode(e.target.value)}>
@@ -229,12 +264,23 @@ export default function DataExplorer() {
           </div>
         )}
 
-        {level === 'district' && (
+        {(level === 'district' || level === 'village') && (
           <div>
             <label className="label">District</label>
             <select className="input" value={districtCode} onChange={(e) => setDistrictCode(e.target.value)}>
               {districts.map((d) => (
                 <option key={d.code} value={d.code}>{d.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {level === 'village' && (
+          <div>
+            <label className="label">Village</label>
+            <select className="input" value={villageCode} onChange={(e) => setVillageCode(e.target.value)}>
+              {villages.map((v) => (
+                <option key={v.code} value={v.code}>{v.name}</option>
               ))}
             </select>
           </div>
@@ -337,7 +383,16 @@ export default function DataExplorer() {
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {villages.map((v) => (
-                  <span key={v.name} className="badge bg-black/5 text-ink-secondary">{v.name}</span>
+                  <button
+                    key={v.code}
+                    onClick={() => {
+                      setVillageCode(v.code);
+                      setLevel('village');
+                    }}
+                    className="badge bg-black/5 text-ink-secondary hover:bg-black/10 transition-colors"
+                  >
+                    {v.name}
+                  </button>
                 ))}
               </div>
             </div>

@@ -124,7 +124,7 @@ All routes are mounted under `/api` on `http://localhost:4000`.
 | `GET /api/regions` | No | List of Cameroon's 10 regions (proxies Application 1's public endpoint) |
 | `GET /api/geo/regions/:code/departments` | No | Departments within a region |
 | `GET /api/geo/departments/:code/districts` | No | Districts within a department |
-| `GET /api/geo/districts/:code/villages` | No | Village names within a district (names only — Application 1's public API doesn't expose village codes, so villages are informational, not chartable) |
+| `GET /api/geo/districts/:code/villages` | No | Villages within a district, with `code`, `name` and `population` — chartable by indicator like any other geography level |
 | `GET /api/indicators` | No | Catalog of the 10 census indicators (population, literacy, water access, etc.) with units and categories |
 | `GET /api/values?indicator=&year=&geographies=` | No (uses backend's key internally) | One indicator's value across an arbitrary list of geography codes — powers every comparison chart and table. Returns `value: null` for any geography with no census row, instead of a misleading `0`. |
 | `GET /api/value?geography=&indicator=&year=` | No (uses backend's key internally) | Single indicator value for a single geography |
@@ -144,18 +144,22 @@ message — no internal details are leaked to the public.
 ## 6. Frontend features
 
 ### Census Data Explorer (`/data`) — the core deliverable
-- **Drill-down hierarchy**: toggle between Region / Department / District
-  level. Picking a region reloads its departments; picking a department
-  reloads its districts — each level's comparison chart, stat cards, table
-  and population donuts re-target automatically.
+- **Drill-down hierarchy**: toggle between Region / Department / District /
+  Village level. Picking a region reloads its departments; picking a
+  department reloads its districts; picking a district reloads its
+  villages — each level's comparison chart, stat cards, table and
+  population donuts re-target automatically.
 - **Comparison bar chart**: the selected indicator's value across every
   entity at the current level, with the focused entity highlighted and a
-  dashed reference line for the group average.
+  dashed reference line for the group average. Entities with no figure yet
+  for the selected indicator/year are excluded from the chart and counted
+  in an "N excluded — no data yet" note, rather than plotted as zero.
 - **Population snapshot**: two donut charts (gender split, urban/rural
-  split) for whichever region/department/district is focused — works at
-  every level because the underlying census rows exist at every level.
-- **Villages panel**: informational list of villages inside the focused
-  district.
+  split) for whichever region/department/district/village is focused —
+  works at every level because the underlying census rows exist at every
+  level.
+- **Villages panel**: list of villages inside the focused district;
+  clicking one jumps straight to that village at Village level.
 - **Stat cards**: focused entity's value, group average, highest and
   lowest entity for the selected indicator — all with an explicit "No
   data" fallback rather than a fake zero or a stuck spinner.
@@ -204,6 +208,13 @@ noting in a report on API-consumer design:
    1's full geography hierarchy (region → department → district, plus an
    informational village list), matching everything Application 1's API
    actually exposes.
+6. **Village-level drill-down**: Application 1 fixed a bug where its
+   villages endpoint omitted each village's `code`, which had made
+   village-level indicator lookups impossible (they'd silently query with
+   `geography=undefined`). With `code` now present, Village became a full
+   level in the Data Explorer (chartable, tabulable, with its own
+   population snapshot) instead of a name-only informational list. This
+   also removed the one caveat noted under "Known limitations" below.
 
 ---
 
@@ -258,9 +269,19 @@ Environment variables (`NGO-website/backend/.env`):
 
 - **Single census year**: the seeded dataset only has one year of data
   (2026), so year-over-year trend analysis isn't currently meaningful.
-- **Village-level indicators**: Application 1's public villages endpoint
-  returns village *names* but not *codes*, so villages can be listed but
-  not looked up for indicator values through the public API surface.
+- **Incomplete data by design**: the census dataset is being filled in
+  incrementally by an admin, so any geography/indicator/year combination
+  can legitimately have no figure yet. `GET /protected/data` returns
+  `{ data: [] }` (not an error) in that case, and every level of the Data
+  Explorer — chart, table, stat cards, population snapshot — renders an
+  explicit "No data" state rather than erroring or showing a blank/zero
+  value.
+- **Geography tree is not cached**: departments/districts/villages and the
+  indicator catalog are fetched fresh on every page load (no
+  `localStorage`/build-time snapshot), since an admin can add or edit
+  geography and data values at any time. Within a single page session the
+  frontend keeps whatever it already fetched in React state — reload the
+  page to pick up admin changes made during that session.
 - **Contact form** is UI-only (no backend email/storage wired up) —
   intentionally out of scope for this project's focus on the census-API
   integration.

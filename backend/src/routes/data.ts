@@ -85,10 +85,7 @@ router.get('/geo/departments/:code/districts', async (req, res, next) => {
 
 router.get('/geo/districts/:code/villages', async (req, res, next) => {
   try {
-    // Application 1's public villages endpoint only returns names (no
-    // code), so villages are informational here — not chartable by
-    // indicator the way regions/departments/districts are.
-    const { data } = await censusClient.get<{ data: { name: string }[] }>(
+    const { data } = await censusClient.get<{ data: UpstreamGeography[] }>(
       `/protected/districts/${req.params.code}/villages`
     );
     res.json({ data: data.data });

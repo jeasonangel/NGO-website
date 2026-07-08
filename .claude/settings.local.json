@@ -27,7 +27,10 @@
       "Bash(curl -s -i \"http://localhost:3001/api/v1/protected/data?geography=CE&indicator=POP_TOT&year=2026\" -H \"X-API-Key: cam_7e1ce47ffc5e44508f27728caab36a1217aefa04d9f711458179cad5f5e05111\")",
       "Bash(cat \"/c/Users/DELL/AppData/Local/Temp/claude/c--Users-DELL-Desktop-BtechDesign-project-NGO-website/8166fb4c-98da-48e1-b925-38cf2696c53f/scratchpad/backend-dev.log\")",
       "Read(//c/Users/DELL/AppData/Local/Temp/claude/c--Users-DELL-Desktop-BtechDesign-project-NGO-website/8166fb4c-98da-48e1-b925-38cf2696c53f/scratchpad/**)",
-      "Bash(tail -n 15 \"/c/Users/DELL/AppData/Local/Temp/claude/c--Users-DELL-Desktop-BtechDesign-project-NGO-website/8166fb4c-98da-48e1-b925-38cf2696c53f/scratchpad/backend-dev3.log\")"
+      "Bash(tail -n 15 \"/c/Users/DELL/AppData/Local/Temp/claude/c--Users-DELL-Desktop-BtechDesign-project-NGO-website/8166fb4c-98da-48e1-b925-38cf2696c53f/scratchpad/backend-dev3.log\")",
+      "Read(//c//**)",
+      "Bash(npm ls *)",
+      "Read(//c/Users/DELL/Desktop/BtechDesign_project/**)"
     ]
   }
 }

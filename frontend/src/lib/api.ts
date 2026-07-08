@@ -9,7 +9,13 @@ const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000/api'
 // Only year currently populated in the census dataset.
 export const CENSUS_YEAR = 2026;
 
-export type GeoLevel = 'region' | 'department' | 'district';
+export type GeoLevel = 'region' | 'department' | 'district' | 'village';
+
+export interface Village {
+  code: string;
+  name: string;
+  population?: number;
+}
 
 export interface GeoValue {
   code: string;
@@ -33,7 +39,7 @@ export const api = {
     axios.get<{ data: Geography[] }>(`${API_BASE}/geo/departments/${departmentCode}/districts`),
 
   getVillages: (districtCode: string) =>
-    axios.get<{ data: { name: string }[] }>(`${API_BASE}/geo/districts/${districtCode}/villages`),
+    axios.get<{ data: Village[] }>(`${API_BASE}/geo/districts/${districtCode}/villages`),
 
   getIndicators: () => axios.get<{ data: Indicator[] }>(`${API_BASE}/indicators`),
 
